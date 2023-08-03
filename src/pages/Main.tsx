@@ -1,47 +1,80 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import { Button, Input } from "antd";
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { Button, Input } from 'antd';
+import axios from 'axios';
 
 const Main: React.FC<any> = () => {
   const [data, setData] = useState([]);
-  const [contents, setContents] = useState<string>("");
+  const [contents, setContents] = useState<string>('');
+  const email = localStorage.getItem('email');
+  const fetchData = async () => {
+    // alert('TODO 요구사항에 맞추어 기능을 완성해주세요.');
 
-  const fetchData = () => {
-    alert("TODO 요구사항에 맞추어 기능을 완성해주세요.");
-
-    // TODO: 데이터베이스에서 boards 리스트 가져오기
-    // TODO: 가져온 결과 배열을 data state에 set 하기
-    // TODO: 네트워크 등 기타 문제인 경우, "일시적인 오류가 발생하였습니다. 고객센터로 연락주세요." alert
+    try {
+      // TODO: 데이터베이스에서 boards 리스트 가져오기
+      const response = await axios.get('http://localhost:4000/boards');
+      const data = response.data;
+      // TODO: 가져온 결과 배열을 data state에 set 하기
+      setData(data);
+    } catch {
+      // TODO: 네트워크 등 기타 문제인 경우, "일시적인 오류가 발생하였습니다. 고객센터로 연락주세요." alert
+      console.log('일시적인 오류가 발생하였습니다. 고객센터로 연락주세요.');
+    }
   };
 
   useEffect(() => {
     // TODO: 해당 useEffect는 최초 마운트시에만 동작하게 제어
     fetchData();
-  });
+  }, []);
 
-  const handleBoardSubmit = (e: any) => {
-    alert("TODO 요구사항에 맞추어 기능을 완성해주세요.");
-
+  const handleBoardSubmit = async (e: any) => {
+    // alert('TODO 요구사항에 맞추어 기능을 완성해주세요.');
     // TODO: 자동 새로고침 방지
+    e.preventDefault();
     // TODO: 이메일과 contents를 이용하여 post 요청 등록(isDeleted 기본값은 false)
-    // TODO: 네트워크 등 기타 문제인 경우, "일시적인 오류가 발생하였습니다. 고객센터로 연락주세요." alert
-    // TODO: 성공한 경우, "작성이 완료되었습니다. 아직 자동 새로고침이 불가하여 수동으로 갱신합니다." alert
-    // TODO: 처리완료 후, reload를 이용하여 새로고침
+    const newboard = {
+      email,
+      contents,
+      isDeleted: false,
+    };
+    try {
+      await axios.post(`http://localhost:4000/boards`, newboard);
+
+      // TODO: 성공한 경우, "작성이 완료되었습니다. 아직 자동 새로고침이 불가하여 수동으로 갱신합니다." alert
+      alert('성공한 경우, "작성이 완료되었습니다. 아직 자동 새로고침이 불가하여 수동으로 갱신합니다.');
+    } catch {
+      // TODO: 네트워크 등 기타 문제인 경우, "일시적인 오류가 발생하였습니다. 고객센터로 연락주세요." alert
+      alert('일시적인 오류가 발생하였습니다. 고객센터로 연락주세요');
+    } finally {
+      // TODO: 처리완료 후, reload를 이용하여 새로고침
+      window.location.reload();
+    }
   };
 
   const handleInputChange = (e: any) => {
     setContents(e.target.value);
   };
 
+  const onClickDeleteHandler = async (itemId: number) => {
+    const confirming = window.confirm('진짜로 삭제 할껍니까???');
+    if (!confirming) {
+      return false;
+    }
+    try {
+      await axios.delete(`http://localhost:4000/boards/${itemId}`);
+      // await axios.patch(`http://localhost:4000/boards/${itemId}`, { isDeleted: true });
+      // ㄴ 이거 쓸려면 아래에서 board 리스트할 때 filter로 조건 바꿔줘야함
+    } catch {
+      alert('일시적인 오류가 발생하였습니다. 고객센터로 연락주세요');
+    } finally {
+      window.location.reload();
+    }
+  };
   return (
     <MainWrapper>
       <h1>메인 리스트 페이지</h1>
       <StyledForm onSubmit={handleBoardSubmit}>
-        <StyledInput
-          placeholder="방명록을 입력해주세요."
-          value={contents}
-          onChange={handleInputChange}
-        />
+        <StyledInput placeholder="방명록을 입력해주세요." value={contents} onChange={handleInputChange} />
       </StyledForm>
       <ListWrapper>
         {data.map((item: any, index) => (
@@ -50,7 +83,7 @@ const Main: React.FC<any> = () => {
               {index + 1}. {item.contents}
             </span>
             {/* // TODO: 로그인 한 user의 이메일과 일치하는 경우에만 삭제버튼 보이도록 제어 */}
-            <Button>삭제</Button>
+            {email === item.email && <Button onClick={() => onClickDeleteHandler(item.id)}>삭제</Button>}
           </ListItem>
         ))}
       </ListWrapper>

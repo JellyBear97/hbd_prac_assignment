@@ -95,6 +95,18 @@
       "contents": "asdfasdf",
       "isDeleted": false,
       "id": 9
+    },
+    {
+      "email": "123",
+      "contents": "gkdl",
+      "isDeleted": false,
+      "id": 10
+    },
+    {
+      "email": "123",
+      "contents": "가나다",
+      "isDeleted": true,
+      "id": 11
     }
   ]
 }
